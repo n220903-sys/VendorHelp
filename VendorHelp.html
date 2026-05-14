@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>VendorHelp</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',sans-serif;background:#FFF8F0;color:#1A1200;max-width:430px;margin:0 auto;min-height:100vh}
+:root{--or:#E65100;--orl:#FF6B00;--gr:#2E7D32;--grl:#4CAF50;--cr:#FFF8F0;--mu:#8D6E63;--wh:#fff}
+.hdr{background:linear-gradient(135deg,#E65100,#FF6B00);padding:14px 18px 18px;text-align:center}
+.hdr h1{font-size:24px;font-weight:900;color:#fff;letter-spacing:1px}
+.hdr p{font-size:11px;color:rgba(255,255,255,0.85);margin-top:2px}
+.hdr .icons{font-size:20px;margin-bottom:3px}
+.tabs{display:flex;background:#fff;border-bottom:2px solid #FFE0B2;position:sticky;top:0;z-index:10;box-shadow:0 2px 6px rgba(0,0,0,0.07)}
+.tab{flex:1;padding:11px 4px;text-align:center;font-size:11px;font-weight:700;cursor:pointer;color:#8D6E63;border-bottom:3px solid transparent;transition:all .2s}
+.tab.active{color:#E65100;border-bottom-color:#E65100}
+.tab span{font-size:17px;display:block}
+.sec{display:none;padding:14px}
+.sec.active{display:block}
+.tot-card{background:linear-gradient(135deg,#2E7D32,#1B5E20);border-radius:18px;padding:18px;text-align:center;margin-bottom:12px}
+.tot-lbl{font-size:11px;color:rgba(255,255,255,0.75);text-transform:uppercase;letter-spacing:2px}
+.tot-amt{font-size:48px;font-weight:900;color:#fff;line-height:1}
+.tot-amt sup{font-size:22px}
+.voice-bar{display:flex;gap:8px;margin-bottom:10px;align-items:center}
+.mic-btn{flex:0 0 48px;height:48px;border-radius:50%;border:none;font-size:20px;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center}
+.mic-btn.idle{background:#FFE0B2;color:#E65100}
+.mic-btn.listening{background:#E53935;color:#fff;animation:pulse .6s infinite alternate}
+@keyframes pulse{from{box-shadow:0 0 0 0 rgba(229,57,53,.4)}to{box-shadow:0 0 0 10px rgba(229,57,53,0)}}
+.voice-hint{flex:1;padding:12px 14px;background:#fff;border-radius:14px;font-size:12px;color:#8D6E63;border:1.5px solid #FFE0B2;min-height:48px;display:flex;align-items:center;line-height:1.4}
+.voice-hint.active{border-color:#E65100;color:#E65100;font-weight:600}
+.box{background:#fff;border-radius:14px;padding:14px;margin-bottom:10px;box-shadow:0 2px 12px rgba(255,107,0,.1)}
+.box h3{font-size:12px;font-weight:700;color:#8D6E63;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px}
+.item-row{display:grid;grid-template-columns:2fr 1fr auto auto;gap:6px;align-items:center;margin-bottom:7px}
+.item-row select,.item-row input{padding:9px 8px;border:1.5px solid #FFE0B2;border-radius:9px;font-size:13px;background:#FFF8F0;color:#1A1200;outline:none;width:100%;font-family:inherit}
+.item-row select:focus,.item-row input:focus{border-color:#E65100}
+.item-lnt{font-size:13px;font-weight:700;color:#2E7D32;text-align:right;min-width:52px}
+.rm-btn{background:#FFEBEE;border:none;border-radius:7px;color:#E53935;font-size:14px;padding:7px 8px;cursor:pointer}
+.add-btn{width:100%;padding:11px;border:2px dashed #FFB74D;border-radius:11px;background:transparent;color:#E65100;font-size:13px;font-weight:700;cursor:pointer;margin-top:2px;font-family:inherit}
+.add-btn:hover{background:#FFF3E0}
+.act-row{display:flex;gap:8px;margin-top:6px}
+.act-btn{flex:1;padding:13px 6px;border:none;border-radius:13px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:5px;transition:all .18s}
+.act-btn:active{transform:scale(.97)}
+.speak-btn{background:linear-gradient(135deg,#E65100,#FF6B00);color:#fff}
+.save-btn{background:linear-gradient(135deg,#4E342E,#795548);color:#fff}
+.clr-btn{background:#FFEBEE;color:#E53935}
+.calc-disp{background:#1A1200;border-radius:14px;padding:14px 16px;margin-bottom:10px;min-height:72px;display:flex;flex-direction:column;align-items:flex-end;justify-content:flex-end}
+.calc-expr{color:#FFB74D;font-size:15px;font-weight:600;word-break:break-all;text-align:right}
+.calc-res{color:#fff;font-size:36px;font-weight:900}
+.cgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.cb{padding:15px 6px;border:none;border-radius:11px;font-size:17px;font-weight:700;cursor:pointer;transition:all .14s;font-family:inherit}
+.cb:active{transform:scale(.93)}
+.cb.num{background:#fff;color:#1A1200;box-shadow:0 1px 6px rgba(0,0,0,.08)}
+.cb.op{background:#FFF3E0;color:#E65100}
+.cb.clr2{background:#FFEBEE;color:#E53935}
+.cb.eq{background:linear-gradient(135deg,#E65100,#FF6B00);color:#fff}
+.cb.spk{background:linear-gradient(135deg,#2E7D32,#4CAF50);color:#fff;font-size:12px;grid-column:span 4}
+.pr-row{display:flex;align-items:center;gap:8px;margin-bottom:7px;padding:9px 11px;background:#FFF8F0;border-radius:9px}
+.pr-veg{flex:2;font-size:13px;font-weight:600}
+.pr-inp{flex:0 0 72px;padding:7px;border:1.5px solid #FFE0B2;border-radius:8px;font-size:13px;text-align:center;background:#fff;outline:none;font-family:inherit}
+.pr-inp:focus{border-color:#E65100}
+.pr-unit{font-size:11px;color:#8D6E63;white-space:nowrap}
+.sv-btn{width:100%;padding:13px;border:none;border-radius:13px;font-size:14px;font-weight:700;cursor:pointer;margin-top:8px;font-family:inherit}
+.sv-green{background:linear-gradient(135deg,#2E7D32,#4CAF50);color:#fff}
+.sv-or{background:linear-gradient(135deg,#E65100,#FF6B00);color:#fff}
+.h-entry{background:#fff;border-radius:11px;padding:11px 13px;margin-bottom:8px;border-left:4px solid #E65100}
+.h-date{font-size:11px;color:#8D6E63}
+.h-items{font-size:12px;margin:3px 0;color:#555}
+.h-tot{font-size:17px;font-weight:800;color:#2E7D32}
+.h-clr{width:100%;padding:10px;background:#FFEBEE;color:#E53935;border:none;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:2px}
+.mode-toggle{display:flex;background:#FFE0B2;border-radius:20px;padding:3px;margin-bottom:10px;gap:2px}
+.mode-opt{flex:1;padding:8px;text-align:center;font-size:12px;font-weight:700;border-radius:16px;cursor:pointer;color:#E65100;transition:all .2s}
+.mode-opt.active{background:#fff;color:#E65100;box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.type-row{display:flex;gap:8px;margin-bottom:8px}
+.type-input{flex:1;padding:11px 13px;border:1.5px solid #FFE0B2;border-radius:11px;font-size:14px;background:#fff;outline:none;font-family:inherit}
+.type-input:focus{border-color:#E65100}
+.type-go{padding:11px 16px;background:#E65100;color:#fff;border:none;border-radius:11px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:9px 18px;border-radius:18px;font-size:13px;font-weight:600;z-index:999;opacity:0;transition:opacity .3s;white-space:nowrap;pointer-events:none}
+.toast.show{opacity:1}
+.empty{text-align:center;color:#8D6E63;padding:28px;font-size:13px}
+.voice-tip{background:#E8F5E9;border-radius:10px;padding:10px 12px;font-size:12px;color:#2E7D32;margin-bottom:10px;border-left:3px solid #4CAF50}
+.voice-tip strong{display:block;margin-bottom:2px}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="icons">🥕🍅🧅🌽</div>
+  <h1>VendorHelp</h1>
+  <p>Voice + Type — Smart Billing for Street Vendors</p>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('bill',this)"><span>🧾</span>Bill</div>
+  <div class="tab" onclick="switchTab('calc',this)"><span>➕</span>Quick</div>
+  <div class="tab" onclick="switchTab('prices',this)"><span>💰</span>Prices</div>
+  <div class="tab" onclick="switchTab('history',this)"><span>📋</span>History</div>
+</div>
+
+<!-- BILL -->
+<div id="bill" class="sec active">
+  <div class="tot-card">
+    <div class="tot-lbl">Total Amount</div>
+    <div class="tot-amt" id="billTotal"><sup>₹</sup>0.00</div>
+  </div>
+  <div class="mode-toggle">
+    <div class="mode-opt active" id="modeVoice" onclick="setMode('voice')">🎤 Voice Input</div>
+    <div class="mode-opt" id="modeType" onclick="setMode('type')">⌨️ Type Input</div>
+  </div>
+  <div id="voicePanel">
+    <div class="voice-tip">
+      <strong>Say things like:</strong>
+      "Tomato 2 kg" • "Onion half kg" • "Brinjal 1 kg" • "Total" • "Clear"
+    </div>
+    <div class="voice-bar">
+      <button class="mic-btn idle" id="billMic" onclick="startBillVoice()">🎤</button>
+      <div class="voice-hint" id="billHint">Tap mic and say vegetable name and quantity</div>
+    </div>
+  </div>
+  <div id="typePanel" style="display:none">
+    <div class="voice-tip" style="background:#FFF3E0;border-color:#FF6B00;color:#E65100">
+      <strong>Type like:</strong> "Tomato" then quantity in kg
+    </div>
+    <div class="type-row">
+      <input class="type-input" id="typeVegInput" placeholder="Veg name..." list="vegList">
+      <datalist id="vegList"></datalist>
+      <input class="type-input" id="typeQtyInput" type="number" placeholder="kg" min="0.1" step="0.5" style="max-width:80px">
+      <button class="type-go" onclick="addTypedItem()">Add</button>
+    </div>
+  </div>
+  <div class="box">
+    <h3>🛒 Bill Items</h3>
+    <div id="itemsList"></div>
+    <button class="add-btn" onclick="addEmptyItem()">+ Add Row</button>
+  </div>
+  <div class="act-row">
+    <button class="act-btn speak-btn" onclick="speakTotal()">🔊 Speak Total</button>
+    <button class="act-btn save-btn" onclick="saveBill()">💾 Save</button>
+    <button class="act-btn clr-btn" onclick="clearBill()">🗑️</button>
+  </div>
+</div>
+
+<!-- QUICK CALC -->
+<div id="calc" class="sec">
+  <div class="calc-disp">
+    <div class="calc-expr" id="calcExpr"></div>
+    <div class="calc-res" id="calcRes">0</div>
+  </div>
+  <div class="mode-toggle">
+    <div class="mode-opt active" id="cModeVoice" onclick="setCalcMode('voice')">🎤 Voice</div>
+    <div class="mode-opt" id="cModeType" onclick="setCalcMode('type')">⌨️ Buttons</div>
+  </div>
+  <div id="calcVoicePanel">
+    <div class="voice-tip">
+      <strong>Say amounts:</strong> "20 plus 30 plus 40" • "hundred and fifty"
+    </div>
+    <div class="voice-bar">
+      <button class="mic-btn idle" id="calcMic" onclick="startCalcVoice()">🎤</button>
+      <div class="voice-hint" id="calcHint">Tap mic and say amounts like "20 plus 30 plus 40"</div>
+    </div>
+  </div>
+  <div id="calcBtnPanel" style="display:none">
+    <div class="cgrid">
+      <button class="cb num" onclick="ci('7')">7</button>
+      <button class="cb num" onclick="ci('8')">8</button>
+      <button class="cb num" onclick="ci('9')">9</button>
+      <button class="cb op" onclick="ci('+')">+</button>
+      <button class="cb num" onclick="ci('4')">4</button>
+      <button class="cb num" onclick="ci('5')">5</button>
+      <button class="cb num" onclick="ci('6')">6</button>
+      <button class="cb op" onclick="ci('-')">−</button>
+      <button class="cb num" onclick="ci('1')">1</button>
+      <button class="cb num" onclick="ci('2')">2</button>
+      <button class="cb num" onclick="ci('3')">3</button>
+      <button class="cb op" onclick="ci('*')">×</button>
+      <button class="cb clr2" onclick="cClr()">C</button>
+      <button class="cb num" onclick="ci('0')">0</button>
+      <button class="cb op" onclick="cBksp()">⌫</button>
+      <button class="cb eq" onclick="cEq()">=</button>
+    </div>
+  </div>
+  <button style="width:100%;margin-top:8px;padding:13px;border-radius:12px;border:none;cursor:pointer;font-family:inherit;background:linear-gradient(135deg,#2E7D32,#4CAF50);color:#fff;font-size:13px;font-weight:700" onclick="speakCalc()">🔊 Speak Result</button>
+</div>
+
+<!-- PRICES -->
+<div id="prices" class="sec">
+  <div class="box">
+    <h3>📅 Today's Prices (₹/kg)</h3>
+    <div id="priceList"></div>
+    <button class="sv-btn sv-green" onclick="savePrices()">✅ Save Prices</button>
+  </div>
+  <div class="box">
+    <h3>➕ Add New Vegetable</h3>
+    <div style="display:flex;gap:8px;margin-bottom:8px">
+      <input id="newVegName" class="type-input" placeholder="Name e.g. Potato" style="flex:2">
+      <input id="newVegPrice" class="type-input" type="number" placeholder="₹/kg" style="flex:1;text-align:center">
+    </div>
+    <button class="sv-btn sv-or" onclick="addVeg()">+ Add Vegetable</button>
+  </div>
+</div>
+
+<!-- HISTORY -->
+<div id="history" class="sec">
+  <div id="historyList"></div>
+  <button class="h-clr" onclick="clearHistory()">🗑️ Clear All History</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var vegs=JSON.parse(localStorage.getItem('vh_vegs')||'null')||[
+  {name:'Tomato',price:40},{name:'Brinjal',price:30},{name:'Onion',price:25},
+  {name:'Potato',price:20},{name:'Carrot',price:50},{name:'Beans',price:60},
+  {name:'Cabbage',price:20},{name:'Spinach',price:15},{name:'Cucumber',price:25},
+  {name:'Lady Finger',price:35},{name:'Green Chilli',price:60},{name:'Coriander',price:20}
+];
+var billItems=[];
+var hist=JSON.parse(localStorage.getItem('vh_hist')||'[]');
+var inputMode='voice';
+var calcMode='voice';
+var cExpr='',cCur='0';
+
+function switchTab(t,el){
+  document.querySelectorAll('.sec').forEach(function(s){s.classList.remove('active')});
+  document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('active')});
+  document.getElementById(t).classList.add('active');
+  el.classList.add('active');
+  if(t==='prices')renderPrices();
+  if(t==='history')renderHistory();
+}
+
+function setMode(m){
+  inputMode=m;
+  document.getElementById('modeVoice').classList.toggle('active',m==='voice');
+  document.getElementById('modeType').classList.toggle('active',m==='type');
+  document.getElementById('voicePanel').style.display=m==='voice'?'':'none';
+  document.getElementById('typePanel').style.display=m==='type'?'':'none';
+  if(m==='type')updateVegDatalist();
+}
+function setCalcMode(m){
+  calcMode=m;
+  document.getElementById('cModeVoice').classList.toggle('active',m==='voice');
+  document.getElementById('cModeType').classList.toggle('active',m==='type');
+  document.getElementById('calcVoicePanel').style.display=m==='voice'?'':'none';
+  document.getElementById('calcBtnPanel').style.display=m==='type'?'':'none';
+}
+function updateVegDatalist(){
+  var dl=document.getElementById('vegList');
+  dl.innerHTML=vegs.map(function(v){return'<option value="'+v.name+'">'}).join('');
+}
+
+function getSR(){
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){showToast('Voice not supported - use Chrome');return null;}
+  var r=new SR();r.lang='en-IN';r.interimResults=false;r.maxAlternatives=3;return r;
+}
+
+var billSR=null;
+function startBillVoice(){
+  if(billSR){billSR.abort();billSR=null;resetBillMic();return;}
+  var sr=getSR();if(!sr)return;
+  billSR=sr;
+  var mic=document.getElementById('billMic');
+  var hint=document.getElementById('billHint');
+  mic.className='mic-btn listening';mic.textContent='⏹';
+  hint.className='voice-hint active';hint.textContent='Listening... say "Tomato 2 kg"';
+  sr.start();
+  sr.onresult=function(e){
+    var txt=e.results[0][0].transcript.toLowerCase();
+    hint.textContent='Heard: "'+txt+'"';
+    processBillVoice(txt);
+    setTimeout(resetBillMic,1200);
+  };
+  sr.onerror=function(){hint.textContent='Could not hear. Try again.';hint.className='voice-hint';resetBillMic();};
+  sr.onend=function(){if(billSR)resetBillMic();};
+}
+function resetBillMic(){
+  billSR=null;
+  var mic=document.getElementById('billMic');
+  mic.className='mic-btn idle';mic.textContent='🎤';
+}
+
+function processBillVoice(txt){
+  if(/\btotal\b/.test(txt)){speakTotal();return;}
+  if(/\bclear\b/.test(txt)){clearBill();return;}
+  if(/\bsave\b/.test(txt)){saveBill();return;}
+  var qty=1;
+  var qtyMatch=txt.match(/(\d+\.?\d*)\s*(kg|kilo|kilogram)?/);
+  if(qtyMatch)qty=parseFloat(qtyMatch[1]);
+  if(/\bhalf\b/.test(txt))qty=0.5;
+  if(/\bquarter\b/.test(txt))qty=0.25;
+  var found=-1;
+  for(var i=0;i<vegs.length;i++){if(txt.indexOf(vegs[i].name.toLowerCase())>=0){found=i;break;}}
+  if(found<0){
+    for(var i=0;i<vegs.length;i++){
+      var parts=vegs[i].name.toLowerCase().split(' ');
+      for(var j=0;j<parts.length;j++){if(txt.indexOf(parts[j])>=0&&parts[j].length>3){found=i;break;}}
+      if(found>=0)break;
+    }
+  }
+  if(found>=0){
+    billItems.push({vi:found,qty:qty});renderBill();
+    var veg=vegs[found];
+    showToast(veg.name+' '+qty+'kg added');
+    speak(veg.name+', '+qty+' kilogram, '+Math.round(veg.price*qty)+' rupees');
+  } else {
+    document.getElementById('billHint').textContent='Not found. Try typing or add in Prices tab.';
+    speak('Vegetable not found');
+  }
+}
+
+function addTypedItem(){
+  var name=document.getElementById('typeVegInput').value.trim();
+  var qty=parseFloat(document.getElementById('typeQtyInput').value)||1;
+  if(!name){showToast('Enter vegetable name');return;}
+  var found=-1;
+  for(var i=0;i<vegs.length;i++){if(vegs[i].name.toLowerCase()===name.toLowerCase()){found=i;break;}}
+  if(found<0){showToast('Not in list. Add in Prices tab.');return;}
+  billItems.push({vi:found,qty:qty});
+  document.getElementById('typeVegInput').value='';
+  document.getElementById('typeQtyInput').value='';
+  renderBill();showToast(vegs[found].name+' '+qty+'kg added');
+}
+
+function renderBill(){
+  var list=document.getElementById('itemsList');
+  var total=0;list.innerHTML='';
+  billItems.forEach(function(item,i){
+    var v=vegs[item.vi];
+    var lt=v?+(v.price*item.qty).toFixed(2):0;
+    total+=lt;
+    var sel=vegs.map(function(vg,vi){return'<option value="'+vi+'"'+(vi===item.vi?' selected':'')+'>'+vg.name+'</option>'}).join('');
+    list.innerHTML+='<div class="item-row">'+
+      '<select onchange="upItem('+i+',\'vi\',this.value)">'+sel+'</select>'+
+      '<input type="number" min="0.1" step="0.5" value="'+item.qty+'" oninput="upItem('+i+',\'qty\',this.value)" placeholder="kg">'+
+      '<div class="item-lnt">₹'+lt+'</div>'+
+      '<button class="rm-btn" onclick="rmItem('+i+')">✕</button>'+
+    '</div>';
+  });
+  document.getElementById('billTotal').innerHTML='<sup>₹</sup>'+total.toFixed(2);
+}
+function addEmptyItem(){billItems.push({vi:0,qty:1});renderBill();}
+function upItem(i,f,v){if(f==='vi')billItems[i].vi=parseInt(v);else billItems[i].qty=parseFloat(v)||0;renderBill();}
+function rmItem(i){billItems.splice(i,1);renderBill();}
+function clearBill(){billItems=[];renderBill();}
+function getTotal(){return billItems.reduce(function(s,item){var v=vegs[item.vi];return s+(v?v.price*item.qty:0);},0);}
+function speakTotal(){
+  var total=getTotal().toFixed(2);
+  var parts=billItems.map(function(item){var v=vegs[item.vi];return v.name+' '+item.qty+' kilogram '+Math.round(v.price*item.qty)+' rupees';}).join(', ');
+  speak((parts?parts+'. ':'')+'Total amount is '+total+' rupees.');
+}
+function saveBill(){
+  var total=getTotal();
+  if(total===0){showToast('Nothing to save!');return;}
+  hist.unshift({date:new Date().toLocaleString('en-IN'),items:billItems.map(function(item){var v=vegs[item.vi];return{name:v.name,qty:item.qty,price:v.price,line:+(v.price*item.qty).toFixed(2)};}),total:+total.toFixed(2)});
+  localStorage.setItem('vh_hist',JSON.stringify(hist));
+  showToast('Bill saved ✅');clearBill();
+}
+
+var calcSR=null;
+function startCalcVoice(){
+  if(calcSR){calcSR.abort();calcSR=null;resetCalcMic();return;}
+  var sr=getSR();if(!sr)return;
+  calcSR=sr;
+  var mic=document.getElementById('calcMic');
+  var hint=document.getElementById('calcHint');
+  mic.className='mic-btn listening';mic.textContent='⏹';
+  hint.className='voice-hint active';hint.textContent='Listening... say "20 plus 30 plus 40"';
+  sr.start();
+  sr.onresult=function(e){
+    var txt=e.results[0][0].transcript.toLowerCase();
+    hint.textContent='Heard: "'+txt+'"';
+    processCalcVoice(txt);
+    setTimeout(resetCalcMic,1200);
+  };
+  sr.onerror=function(){hint.textContent='Could not hear. Try again.';hint.className='voice-hint';resetCalcMic();};
+  sr.onend=function(){if(calcSR)resetCalcMic();};
+}
+function resetCalcMic(){calcSR=null;var mic=document.getElementById('calcMic');mic.className='mic-btn idle';mic.textContent='🎤';}
+
+function processCalcVoice(txt){
+  var t=txt
+    .replace(/\bplus\b/g,'+').replace(/\band\b/g,'+').replace(/\badd\b/g,'+')
+    .replace(/\bminus\b|\bsubtract\b/g,'-')
+    .replace(/\btimes\b|\bmultiply\b/g,'*')
+    .replace(/\bdivided by\b/g,'/')
+    .replace(/\bhundred\b/g,'00').replace(/\bthousand\b/g,'000')
+    .replace(/\brupees?\b|\brs\b/g,'').replace(/[^0-9+\-*\/\s.]/g,' ')
+    .replace(/\s+/g,' ').trim();
+  if(!t){showToast('Could not parse. Try again.');return;}
+  try{
+    var result=eval(t);
+    if(isNaN(result)||!isFinite(result)){showToast('Could not calculate');return;}
+    cExpr=txt+' =';cCur=result.toString();
+    document.getElementById('calcExpr').textContent=cExpr;
+    document.getElementById('calcRes').textContent=result;
+    speak('The total is '+result+' rupees');
+  }catch(e){showToast('Could not calculate. Try again.');}
+}
+
+function ci(v){
+  if(['+','-','*','/'].includes(v)){cExpr+=cCur+' '+v+' ';cCur='0';}
+  else{cCur=(cCur==='0')?v:cCur+v;}
+  upCalcDisp();
+}
+function cEq(){
+  var full=cExpr+cCur;
+  try{var r=eval(full);cCur=r.toString();cExpr=full+' =';document.getElementById('calcExpr').textContent=cExpr;document.getElementById('calcRes').textContent=r;cExpr='';cCur=r.toString();}catch(e){}
+}
+function cClr(){cExpr='';cCur='0';upCalcDisp();}
+function cBksp(){cCur=cCur.length>1?cCur.slice(0,-1):'0';upCalcDisp();}
+function upCalcDisp(){document.getElementById('calcExpr').textContent=cExpr;document.getElementById('calcRes').textContent=cCur;}
+function speakCalc(){speak('The amount is '+document.getElementById('calcRes').textContent+' rupees');}
+
+function renderPrices(){
+  document.getElementById('priceList').innerHTML=vegs.map(function(v,i){return'<div class="pr-row"><div class="pr-veg">'+v.name+'</div><input class="pr-inp" type="number" id="vp'+i+'" value="'+v.price+'" min="0"><div class="pr-unit">₹/kg</div></div>';}).join('');
+}
+function savePrices(){vegs.forEach(function(v,i){var inp=document.getElementById('vp'+i);if(inp)v.price=parseFloat(inp.value)||v.price;});localStorage.setItem('vh_vegs',JSON.stringify(vegs));showToast('Prices saved ✅');renderBill();}
+function addVeg(){
+  var name=document.getElementById('newVegName').value.trim();
+  var price=parseFloat(document.getElementById('newVegPrice').value);
+  if(!name){showToast('Enter name');return;}if(!price){showToast('Enter price');return;}
+  vegs.push({name:name,price:price});localStorage.setItem('vh_vegs',JSON.stringify(vegs));
+  document.getElementById('newVegName').value='';document.getElementById('newVegPrice').value='';
+  renderPrices();showToast(name+' added ✅');
+}
+
+function renderHistory(){
+  var list=document.getElementById('historyList');
+  if(!hist.length){list.innerHTML='<div class="empty">No bills saved yet</div>';return;}
+  list.innerHTML=hist.map(function(e){return'<div class="h-entry"><div class="h-date">'+e.date+'</div><div class="h-items">'+e.items.map(function(i){return i.name+' '+i.qty+'kg = ₹'+i.line;}).join(' | ')+'</div><div class="h-tot">Total: ₹'+e.total.toFixed(2)+'</div></div>';}).join('');
+}
+function clearHistory(){hist=[];localStorage.setItem('vh_hist',JSON.stringify(hist));renderHistory();showToast('History cleared');}
+
+function speak(txt){if(!window.speechSynthesis){showToast('Voice not supported');return;}window.speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(txt);u.lang='en-IN';u.rate=0.88;u.pitch=1;window.speechSynthesis.speak(u);}
+function showToast(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2500);}
+
+renderBill();
+
+
+
+sr.onresult = function(e) {
+    var txt = e.results[0][0].transcript.toLowerCase();
+    console.log("Speech Result:", txt); // Add this line
+    hint.textContent = 'Heard: "' + txt + '"';
+    processBillVoice(txt);
+    setTimeout(resetBillMic, 1200);
+};
+
+</script>
+</body>
+</html>
